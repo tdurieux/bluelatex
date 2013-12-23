@@ -25,7 +25,7 @@ import tiscaf.let.ResourceLet
  */
 object WebResourceLet extends ResourceLet {
 
-  val dirRoot = "/"
+  val dirRoot = new java.io.File( "../../../../web" ).getCanonicalPath
 
 }
 
