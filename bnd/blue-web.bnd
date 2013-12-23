@@ -1,0 +1,9 @@
+Bundle-Activator: gnieh.blue.web.BlueWebActivator
+Bundle-SymbolicName: org.gnieh.blue.web
+Bundle-Name: \\BlueLaTeX Web client
+
+Private-Package=gnieh.blue.web
+Import-Package=*
+
+Export-Package=
+
