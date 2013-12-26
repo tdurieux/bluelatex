@@ -136,6 +136,69 @@ angular.module('bluelatex.controller', ['bluelatex.User'])
         }, function (progress) {});
     };
 
+  }]).controller('PaperController', ['$scope','localize','$location', function ($scope, User,localize,$location) {
+    var paper = {};
+    $scope.user = paper;
+    $scope.logs = [];
+    $scope.toc = [];
+    $scope.listType = 'toc';
+
+
+
+    $scope.aceLoaded = function(_editor) {
+      // Editor part
+      var _session = _editor.getSession();
+      var _renderer = _editor.renderer;
+
+      $scope.goToLine = function (line) {
+        _editor.gotoLine(line);
+      };
+
+      // Options
+      _editor.setReadOnly(false);
+      _session.setUndoManager(new ace.UndoManager());
+      _renderer.setShowGutter(true);
+
+      // Events
+      _editor.on("changeSession", function(){  });
+      _session.on("change", function(){
+        parseTOC(_editor.getSession().getValue());
+      });
+      parseTOC(_editor.getSession().getValue());
+
+      // HACK to have the ace instance in the scope...
+      $scope.modeChanged = function () {
+        _editor.getSession().setMode('ace/mode/latex');
+      };
+    };
+    var parseTOC = function (latex) {
+      var toc = [];
+      var keys = ['chapter','section','subsection','subsubsection','paragraph'];
+      var regex = '\\\\('+keys.join('|')+')(\\*)?\{([^}]+)\}';
+      var reg = new RegExp(regex,"gi");
+      var astring = latex.split('\n');
+
+      for (var i = 0; i < astring.length; i++) {
+        var number = i+1;
+        var line = astring[i];
+        var result;
+        while ((result = reg.exec(line)) !== null) {
+          var type = (result[1]);
+          toc.push({
+            type: type,
+            level: keys.indexOf(type),
+            restart: result[2]=='*',
+            title: result[3],
+            line: number
+          });
+        }
+      };
+      console.log(toc);
+      $scope.toc = toc;
+    }
+    $scope.aceChanged = function(e) {
+    };
+
   }])
   .controller('MyCtrl1', [function() {
 

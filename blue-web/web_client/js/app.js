@@ -9,14 +9,15 @@ angular.module('bluelatex', [
   'myApp.directives',
   'bluelatex.User',
   'bluelatex.controller',
-  'bluelatex.menu'
+  'bluelatex.menu',
+  'ui.ace'
 ]).config(['$routeProvider', function($routeProvider) {
   $routeProvider.when('/login', {templateUrl: 'partials/login.html', controller: 'LoginController', name: 'login', private: false});
   $routeProvider.when('/logout', {templateUrl: 'partials/partial2.html', controller: 'MyCtrl2', name: 'logout', private: false});
   $routeProvider.when('/register', {templateUrl: 'partials/register.html', controller: 'RegisterController', name: 'register', private: false});
   $routeProvider.when('/profile', {templateUrl: 'partials/partial2.html', controller: 'MyCtrl2', name: 'profile', private: true});
   $routeProvider.when('/papers', {templateUrl: 'partials/partial1.html', controller: 'MyCtrl1', name: 'papers', private: true});
-  $routeProvider.when('/paper/:id/?', {templateUrl: 'partials/partial1.html', controller: 'MyCtrl1', name: 'paper', private: true});
+  $routeProvider.when('/paper/:id/?', {templateUrl: 'partials/paper.html', controller: 'PaperController', name: 'paper', private: false});
   $routeProvider.otherwise({redirectTo: '/papers'});
 }]).run( function($rootScope, $location) {
     // register listener to watch route changes
