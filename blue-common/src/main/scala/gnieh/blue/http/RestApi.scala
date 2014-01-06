@@ -46,6 +46,11 @@ trait RestApi {
   private[http] val patches = ListBuffer.empty[PartialFunction[HReqData, HLet]]
   private[http] val gets = ListBuffer.empty[PartialFunction[HReqData, HLet]]
   private[http] val deletes = ListBuffer.empty[PartialFunction[HReqData, HLet]]
+  private[http] val options = ListBuffer.empty[PartialFunction[HReqData, HLet]]
+
+  def OPTIONS(handler: PartialFunction[HReqData, HLet]) {
+    options += handler
+  }
 
   def POST(handler: PartialFunction[HReqData, HLet]) {
     posts += handler
