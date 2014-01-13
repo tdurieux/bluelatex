@@ -38,10 +38,6 @@ import org.osgi.framework.BundleContext
  */
 class CoreApi(config: Config, system: ActorSystem, context: BundleContext, templates: Templates, mailAgent: MailAgent, recaptcha: ReCaptcha, logger: Logger) extends RestApi {
 
-  OPTIONS {
-      case p"*" =>
-        new LoginLet(config)
-  }
   POST {
     // registers a new user
     case p"users" =>
