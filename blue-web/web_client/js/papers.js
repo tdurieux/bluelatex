@@ -175,6 +175,7 @@ angular.module('bluelatex.papers',[])
     };
     $scope.roleFilterReviewer = roleFilterReviewer;
     $scope.roleFilter = function (paper) {
+      console.log('roleFilter', paper);
       switch ($scope.date_filter) {
         case 'all':
           return true;

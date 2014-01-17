@@ -68,7 +68,7 @@ angular.module('bluelatex.menu', [])
           icon: null
         },
         {
-          label: 'PDF',
+          label: 'Download',
           type: 'action',
           action: 'pdf',
           class: '',
@@ -80,6 +80,20 @@ angular.module('bluelatex.menu', [])
           class: '',
           icon: null,
           action: 'partials/paper_share_menu.html'
+        },
+        {
+          label: 'Send to Arxiv',
+          type: 'action',
+          class: '',
+          icon: null,
+          action: 'arxiv'
+        },
+        {
+          label: 'Switch ACE/Textarea',
+          type: 'action',
+          class: '',
+          icon: null,
+          action: 'switch_editor_mode'
         },
         {
           label: 'Settings',

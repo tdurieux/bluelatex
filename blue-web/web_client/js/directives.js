@@ -14,4 +14,10 @@ angular.module('myApp.directives', [])
       },
       template: '<img src="https://secure.gravatar.com/avatar/{{email | gravatar}}?s=200&d=mm">'
     };
-  }]);
+  }]).directive('focusOn', function() {
+     return function(scope, elem, attr) {
+        scope.$on(attr.focusOn, function(e) {
+            elem[0].focus();
+        });
+     };
+  });
