@@ -38,7 +38,8 @@ angular.module('bluelatex.paper',[])
             for (var i = 0; i < data.length; i++) {
               var resource = data[i]
               array.push({
-                name: resource,
+                title: resource,
+                name: resource.replace(/\.[^\.]+$/,''),
                 type: getFileType(resource),
                 extension: getFileNameExtension(resource)
               });
@@ -90,8 +91,8 @@ angular.module('bluelatex.paper',[])
         getResources: function (paper_id) {
           return resources.get({ paper_id: paper_id }).$promise;
         },
-        getResource: function (paper_id, resource) {
-          return resources.get({ paper_id: paper_id, resource: resource }).$promise;
+        getResourceUrl: function (paper_id, resource) {
+          return apiRoot+'/papers/'+paper_id+'/files/resources/'+resource;
         },
         uploadResource: function (paper_id,resource, data) {
           return upload(paper_id, data, resource);
@@ -249,23 +250,33 @@ angular.module('bluelatex.paper',[])
       }
   }).controller('PaperController', ['$scope','localize','$location','ace','Paper','$routeParams','$upload', function ($scope,localize,$location, ace, Paper,$routeParams,$upload) {
     var paper_id = $routeParams.id;
+    var getPaperInfo = function () {
+      Paper.getInfo(paper_id).then(function (data) {
+        $scope.paper = data;
+        $scope.paper.etag = data.header.etag;
+      }, function (error) {
+        console.log(error);
+      });
+    };
+    getPaperInfo();
 
-    Paper.getInfo(paper_id).then(function (data) {
-      $scope.paper = data;
-      $scope.paper.etag = data.header.etag;
-    }, function (error) {
-      console.log(error);
-    });
-    Paper.getSynchronized(paper_id).then(function (data) {
-      $scope.paper = data;
-    }, function (error) {
-      console.log(error);
-    });
-    Paper.getResources(paper_id).then(function (data) {
-      $scope.resources = data;
-    }, function (error) {
-      console.log(error);
-    });
+    var getSynchronizedFiles = function () {
+      Paper.getSynchronized(paper_id).then(function (data) {
+        $scope.synchronizedFiles = data;
+      }, function (error) {
+        console.log(error);
+      });
+    };
+    getSynchronizedFiles();
+
+    var getResources = function () {
+      Paper.getResources(paper_id).then(function (data) {
+        $scope.resources = data;
+      }, function (error) {
+        console.log(error);
+      });
+    };
+    getResources();
 
     var textLog= '';
 
@@ -345,6 +356,7 @@ angular.module('bluelatex.paper',[])
         var file = $files [0];
         $scope.new_file= {
           title: file.name,
+          name: file.name.replace(/\.[^\.]+$/,''),
           type: getFileType(file.name),
           file: file,
           extension: getFileNameExtension(file.name)
@@ -352,19 +364,35 @@ angular.module('bluelatex.paper',[])
       }
       console.log($scope.new_file);
     };
+
     $scope.uploadResource = function () {
       Paper.uploadResource(paper_id, $scope.new_file.title, $scope.new_file.file).then(function (data) {
         console.log(data);
+        getResources();
+        $scope.new_file = {};
       }, function (error) {
         console.log(error);
       }, function (progress) {
         console.log(progress);
       });
     };
+
     $scope.cancelUploadResource = function () {
       $scope.new_file = {};
     };
+    $scope.viewResource = function (resource) {
 
+    };
+    $scope.removeResource = function (resource) {
+      Paper.removeResource(paper_id, resource.title).then(function (data) {
+        getResources();
+      }, function (error) {
+        console.log(error);
+      });
+    };
+    $scope.downloadResource = function (resource) {
+      window.open(Paper.getResourceUrl(paper_id, resource.title));
+    };
   }]).controller('NewPaperController', ['$scope','localize','$location','Paper', function ($scope,localize,$location, Paper) {
     var paper = {};
 
