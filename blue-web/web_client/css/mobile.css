@@ -1,3 +1,40 @@
+@media only screen and (max-width : 478px) {
+  #menu_user {
+    display: none;
+  }
+  #menu_user_mobile {
+    display: block;
+    float: none;
+  }
+  #menu_user_mobile label {
+    padding: 0 11px;
+
+  }
+  #menu_user_mobile .submenu {
+    position: relative;
+    background: transparent;
+    padding: 0;
+  }
+  #menu_user_mobile .submenu a {
+    color: #fff;
+    padding-left: 60px;
+    display: block;
+
+    width: 100%;
+  }
+
+
+  #sort {
+    display: none;
+  }
+  #search input {
+    width: 250px!important;
+  }
+
+  #paper_list.list .paper .date {
+    display: none;
+  }
+}
 @media only screen and (max-width : 768px) {
   nav {
       position: fixed;
@@ -71,8 +108,6 @@
     display: block;
   }
 
-
-
   #papers .top h1 {
     display: none;
   }
@@ -95,15 +130,21 @@
     margin-right: 4px!important;
     width: 140px;
   }
-  #paper_list.list .paper .authors,#paper_list.list .paper .role {
-    display: none!important;
-  }
-
 
   #paper .leftCol {
     display: none;
   }
   #paper .centerRightCol {
     padding-left: 0!important;
+  }
+}
+@media only screen and (max-width : 900px) {
+  #paper_list.list .paper .role {
+    display: none!important;
+  }
+}
+@media only screen and (max-width : 1000px) {
+  #paper_list.list .paper .authors {
+    display: none!important;
   }
 }

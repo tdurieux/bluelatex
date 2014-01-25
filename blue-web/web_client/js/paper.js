@@ -286,7 +286,7 @@ angular.module('bluelatex.paper',[])
     $scope.mode = 'ace';
     $scope.logs = [];
     $scope.toc = [];
-
+    $scope.content = '';
     //action listener: action in the menu
     $scope.$on('handleAction', function(event, data){
       if($scope[data]) {
@@ -296,6 +296,10 @@ angular.module('bluelatex.paper',[])
 
     $scope.switch_editor_mode = function () {
       $scope.mode = ($scope.mode == 'ace'?'text':'ace');
+      if($scope.mode == 'ace') {
+        ace.setContent($scope.content);
+        ace.getEditor().focus();
+      }
     }
 
     $scope.compile = function () {
@@ -419,6 +423,30 @@ angular.module('bluelatex.paper',[])
     }, function (error) {
       console.log(error);
     });
+    console.log("edit_paper");
+
+    $scope.new_author = '';
+    $scope.new_reviewer = '';
+
+    $scope.removeAuthor = function (author) {
+      $scope.paper.authors.splice($scope.paper.authors.indexOf(author), 1);
+    };
+    $scope.removeReviewer = function (reviewer) {
+      $scope.paper.reviewers.splice($scope.paper.reviewers.indexOf(reviewer), 1);
+    };
+
+    $scope.addAuthor = function () {
+      var author = $scope.new_author;
+      if($scope.paper.authors.indexOf(author) < 0)
+        $scope.paper.authors.push(author);
+      $scope.new_author = '';
+    };
+    $scope.addReviewer = function () {
+      var reviewer = $scope.new_reviewer;
+      if($scope.paper.reviewers.indexOf(reviewer) < 0)
+        $scope.paper.reviewers.push(reviewer);
+      $scope.new_reviewer = '';
+    };
 
     $scope.create = function () {
       Paper.create(paper).then(function (data) {
