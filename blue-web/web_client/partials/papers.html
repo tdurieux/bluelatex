@@ -40,7 +40,7 @@
         </label>
         <label ng-repeat="tag in tags | orderBy:'label':false">
             <input type="radio" name="tag" ng-model="tag_filter" value="tag">
-            <div class="label"><span class="diskColor" style="background: {{tag.color}}"></span> {{tag.label}}</div>
+            <div class="label"><span class="diskColor" ng-style="{ backgroundColor: tag.color }"></span> {{tag.label}}</div>
             <span class="nb">{{(papers| filter:search | filter:dateFilter | filter:roleFilter ).length }}</span>
         </label>
         <h3 data-i18n="_Date_filter_">Date filter</h3>
@@ -122,7 +122,7 @@
                     <div class="clear"></div>
                 </div>
                 <div class="tags">
-                    <a href="#/paper/{{paper.id}}"><span ng-repeat="tag in paper.tags"><span class="diskColor" style="background: {{tag.color}}"></span></span></a>
+                    <a href="#/paper/{{paper.id}}"><span ng-repeat="tag in paper.tags"><span class="diskColor" ng-style="{ backgroundColor: tag.color }"></span></span></a>
                 </div>
                 <div class="role">
                     <a href="#/paper/{{paper.id}}">{{paper.role}}</a>
