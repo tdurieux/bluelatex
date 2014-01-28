@@ -112,4 +112,3 @@ class DeleteUserLet(username: String, context: BundleContext, config: Config, re
     }
 
 }
-
