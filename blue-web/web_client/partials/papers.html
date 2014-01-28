@@ -32,6 +32,17 @@
         </div>
     </div>
     <div class="left">
+        <h3 data-i18n="_Tag_filter_"></h3>
+        <label>
+            <input type="radio" name="tag" ng-model="tag_filter" value="all">
+            <span class="label" data-i18n="_All_">All</span>
+            <span class="nb">{{(papers| filter:search | filter:dateFilter | filter:roleFilter ).length }}</span>
+        </label>
+        <label ng-repeat="tag in tags | orderBy:'label':false">
+            <input type="radio" name="tag" ng-model="tag_filter" value="tag">
+            <div class="label"><span class="diskColor" style="background: {{tag.color}}"></span> {{tag.label}}</div>
+            <span class="nb">{{(papers| filter:search | filter:dateFilter | filter:roleFilter ).length }}</span>
+        </label>
         <h3 data-i18n="_Date_filter_">Date filter</h3>
         <label>
             <input type="radio" name="filter" ng-model="date_filter" value="all">
@@ -83,17 +94,6 @@
             <input type="radio" name="role" ng-model="role_filter" value="reviewer">
             <span class="label" data-i18n="_Reviewer_">Reviewer</span>
             <span class="nb">{{(papers| filter:search | filter:dateFilter | filter:roleFilterReviewer).length }}</span>
-        </label>
-        <h3 data-i18n="_Tag_filter_">Tar filter</h3>
-        <label>
-            <input type="radio" name="tag" ng-model="tag_filter" value="all">
-            <span class="label" data-i18n="_All_">All</span>
-            <span class="nb">{{(papers| filter:search | filter:dateFilter | filter:roleFilter ).length }}</span>
-        </label>
-        <label ng-repeat="tag in tags | orderBy:'label':false">
-            <input type="radio" name="tag" ng-model="tag_filter" value="tag">
-            <div class="label"><span class="diskColor" style="background: {{tag.color}}"></span> {{tag.label}}</div>
-            <span class="nb">{{(papers| filter:search | filter:dateFilter | filter:roleFilter ).length }}</span>
         </label>
     </div>
     <div class="center">
