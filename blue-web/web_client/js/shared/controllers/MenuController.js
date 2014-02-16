@@ -56,19 +56,7 @@ angular.module('bluelatex.Shared.Controllers.Menu', ['bluelatex.Shared.Directive
       }];
       var optionsPage = {
         'papers': [],
-        'paper': [{
-          label: 'Compile',
-          type: 'action',
-          action: 'compile',
-          class: '',
-          icon: null
-        }, {
-          label: 'Download',
-          type: 'action',
-          action: 'pdf',
-          class: '',
-          icon: null
-        }, {
+        'paper': [ {
           label: 'Share',
           type: 'menu',
           class: '',
