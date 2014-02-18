@@ -14,6 +14,7 @@ angular.module("bluelatex.Latex.Services.SyncTexParser", [])
       };
 
       var parsePDFSync = function (pdfsyncBody) {
+        var numberPages = 0;
         var currentPage = {};
         var currentElement = {};
 
@@ -56,6 +57,9 @@ angular.module("bluelatex.Latex.Services.SyncTexParser", [])
               blocks: [],
               type: 'page',
             };
+            if(currentPage.page > numberPages) {
+              numberPages = currentPage.page;
+            }
             currentElement = currentPage;
             continue;
           }
@@ -159,6 +163,7 @@ angular.module("bluelatex.Latex.Services.SyncTexParser", [])
         pdfsyncObject.pages = pages;
         pdfsyncObject.blockNumberLine = blockNumberLine;
         pdfsyncObject.hBlocks = hBlocks;
+        pdfsyncObject.numberPages = numberPages;
         return pdfsyncObject;
       };
       return {

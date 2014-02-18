@@ -5,10 +5,11 @@ angular.module('bluelatex.Latex.Directives.Vignette', [])
       'scope': {
         'page': "@",
         'scale': "=scale",
-        'type': "=type",
+        'type': "@",
         'url': "=url",
         'synctex': "=synctex",
-        'current': "=current"
+        'currentPage': "@",
+        'revision': "=revision"
       },
       'controller': function($scope) {
         var pdf = null;
@@ -42,10 +43,10 @@ angular.module('bluelatex.Latex.Directives.Vignette', [])
             height: elems[0].height
           };
 
-          for (var i = elems.length - 1; i >= 1; i--) {
+          for (var i = elems.length - 1; i >= 0; i--) {
             var e=elems[i];
             if(e.page != $scope.page) continue;
-            if(e.type!='x') continue;
+            //if(e.type!='x') continue;
             if(e.bottom!=currentLine.bottom){
               lines.push(currentLine);
               currentLine = {
@@ -93,7 +94,7 @@ angular.module('bluelatex.Latex.Directives.Vignette', [])
               height: (pdfDimension.height-s2[1])+"px",
               width: s2[0] + "px",
               left: s1[0] + "px",
-              bottom: s1[1] + "px"
+              top :pdfDimension.height-s1[1]-(pdfDimension.height-s2[1]) + 'px'
             });
           }
         });
@@ -114,7 +115,6 @@ angular.module('bluelatex.Latex.Directives.Vignette', [])
         function renderPage(page) {
           var parent = element[0];
           var ratio  = Number($scope.scale);
-          console.log(element.width,parent.clientWidth);
           if(!ratio)
             ratio  = parent.clientWidth/page.getViewport(1.0).width;
 
@@ -178,13 +178,31 @@ angular.module('bluelatex.Latex.Directives.Vignette', [])
 
         $scope.resize = function (e) {
           element = e;
-          if(pdf)
+          if(pdf) {
             pdf.getPage(1).then(renderPage);
+          } else if((img = element[0].getElementsByTagName("img")[0])){
+            pdfDimension = {
+              scale: img.width/img.naturalWidth,
+              height: img.naturalHeight
+            };
+          }
         };
 
         $scope.loadPDF = function (e) {
           element = e;
-          loadPdf($scope.url + '_' + $scope.page);
+          loadPdf($scope.url + '.pdf');
+        };
+        $scope.loadImage = function (e) {
+          element = e;
+          setTimeout(function () {
+            var img = element[0].getElementsByTagName("img")[0];
+            img.onload=function (event) {
+              pdfDimension = {
+                scale: img.width/img.naturalWidth,
+                height: img.naturalHeight
+              };
+            };
+          },500);
         };
       },
       'link': function($scope, element, attrs, controller) {
@@ -200,7 +218,8 @@ angular.module('bluelatex.Latex.Directives.Vignette', [])
             $scope.resize(element);
           },500);
         });
-        attrs.$observe('scale', function(val){
+
+        attrs.$observe("scale", function(val){
           if(!val)return;
           clearTimeout(timeoutIDscale);
           timeoutIDscale = setTimeout(function () {
@@ -208,29 +227,37 @@ angular.module('bluelatex.Latex.Directives.Vignette', [])
           },500);
         });
 
+        attrs.$observe("currentpage",function (val) {
+          if(!val)return;
+          if(val == page) {
+            element[0].parentElement.scrollTop = element[0].offsetTop;
+          }
+        });
+
         attrs.$observe("line",function (value) {
           $scope.currentLine = value;
-          console.log('line', value);
         });
 
         element.on('mousemove', function(event) {
           // Prevent default dragging of selected content
           event.preventDefault();
-
         });
 
         var timeoutIDResize = null;
         $window.onresize = function () {
-          console.log("resize");
           clearTimeout(timeoutIDResize);
           timeoutIDResize = setTimeout(function () {
             $scope.resize(element);
           },500);
         };
 
-        $scope.loadPDF(element);
+        if($scope.type == "pdf") {
+          $scope.loadPDF(element);
+        } else if($scope.type == "image") {
+          $scope.loadImage(element);
+        }
       },
-      'template': '<canvas></canvas><div class="textLayer"></div><div class="hightlights"><div class="hightlight_line" ng-repeat="hightlight in hightlights" style="height:{{hightlight.height}};width:{{hightlight.width}};left:{{hightlight.left}};bottom:{{hightlight.bottom}}"></div></div>'
+      'template': '<img src="{{url}}.png?page={{page}}&revision={{revision}}&density=72" ng-if="type==\'image\'"><canvas ng-if="type==\'pdf\'"></canvas><div class="textLayer" ng-if="type==\'pdf\'"></div><div class="hightlights" ng-if="synctex"><div class="hightlight_line" ng-repeat="hightlight in hightlights" style="height:{{hightlight.height}};width:{{hightlight.width}};left:{{hightlight.left}};top:{{hightlight.top}}"></div></div>'
     };
   }])
   .directive('blVignette2',['$document','$window', function($document,$window) {
