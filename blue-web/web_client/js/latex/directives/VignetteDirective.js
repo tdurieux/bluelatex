@@ -1,15 +1,19 @@
-angular.module('bluelatex.Latex.Directives.Vignette', [])
-  .directive('blVignette', ['$window', function($window) {
+/**
+*
+*/
+angular.module('bluelatex.Latex.Directives.Vignette', ['bluelatex.Paper.Services.Paper'])
+  .directive('blVignette', ['$window','PaperService', function($window,PaperService) {
     return {
       'require': 'blVignette',
       'scope': {
         'page': "@",
         'scale': "=scale",
-        'type': "@",
-        'url': "=url",
+        'type': "=vignettetype",
+        'paperId': "=paperid",
         'synctex': "=synctex",
-        'currentPage': "@",
-        'revision': "=revision"
+        'revision': "=revision",
+        'currentPage': "=currentpage",
+        'currentLine': "=currentline"
       },
       'controller': function($scope) {
         var pdf = null;
@@ -17,21 +21,17 @@ angular.module('bluelatex.Latex.Directives.Vignette', [])
         var viewport;
         var pdfDimension;
 
-        $scope.hightlights = [{
-          'height': "10px",
-          'width': "200px",
-          'left': "150px",
-          'bottom': "25px"
-        }];
+        $scope.hightlights = [];
 
-        $scope.$watch("currentLine", function (line) {
+        var lineChange = function (line) {
           $scope.hightlights = [];
+
+          // Check if the synctex file is loaded
           if(!pdfDimension) return;
           if(!$scope.synctex) return;
           if(!$scope.synctex.blockNumberLine) return;
           if(!$scope.synctex.blockNumberLine[line]) return;
           var elems = $scope.synctex.blockNumberLine[line];
-
           if(!isArray(elems) || !elems[0]) return;
 
           var lines = [];
@@ -42,6 +42,7 @@ angular.module('bluelatex.Latex.Directives.Vignette', [])
             bottom: elems[0].bottom,
             height: elems[0].height
           };
+
 
           for (var i = elems.length - 1; i >= 0; i--) {
             var e=elems[i];
@@ -97,14 +98,12 @@ angular.module('bluelatex.Latex.Directives.Vignette', [])
               top :pdfDimension.height-s1[1]-(pdfDimension.height-s2[1]) + 'px'
             });
           }
-        });
+        };
+
+        $scope.$watch("currentLine", lineChange);
 
         function loadPdf(pdfURI) {
             PDFJS.getDocument(pdfURI).then(renderPdf);
-        }
-
-        function loadImage (imageURI) {
-
         }
 
         function renderPdf(p) {
@@ -176,24 +175,39 @@ angular.module('bluelatex.Latex.Directives.Vignette', [])
           });
         }
 
+        /**
+        * Resize the vignette
+        */
         $scope.resize = function (e) {
           element = e;
           if(pdf) {
             pdf.getPage(1).then(renderPage);
-          } else if((img = element[0].getElementsByTagName("img")[0])){
-            pdfDimension = {
-              scale: img.width/img.naturalWidth,
-              height: img.naturalHeight
-            };
+          } else {
+            var img = element[0].getElementsByTagName("img")[0];
+            if(img) {
+              element[0] = img.parentElement;
+              pdfDimension = {
+                scale: element[0]/(img.naturalWidth*0.72),
+                height: img.naturalHeight
+              };
+            }
           }
         };
 
+        /**
+        * Load a PDF
+        */
         $scope.loadPDF = function (e) {
           element = e;
-          loadPdf($scope.url + '.pdf');
+          element.on('click', getCurrentLine);
+          loadPdf(PaperService.getPDFUrl($scope.paperId,$scope.page));
         };
+        /**
+        * Load an image
+        */
         $scope.loadImage = function (e) {
           element = e;
+          element.on('click', getCurrentLine);
           setTimeout(function () {
             var img = element[0].getElementsByTagName("img")[0];
             img.onload=function (event) {
@@ -203,6 +217,56 @@ angular.module('bluelatex.Latex.Directives.Vignette', [])
               };
             };
           },500);
+        };
+
+        /**
+        * Get the first line of the page
+        */
+        var seuil = 2;
+        var getCurrentLine = function(event) {
+          if($scope.synctex == null) return;
+          var x=event.layerX;
+          var y=event.layerY;
+          console.log(x,y,pdfDimension)
+          for (var i = $scope.synctex.hBlocks.length - 1; i >= 0; i--) {
+            var hBlock = $scope.synctex.hBlocks[i];
+
+            var s1 = convertToViewportPoint(hBlock.left, hBlock.bottom, pdfDimension);
+            var s2 = convertToViewportPoint(hBlock.width, hBlock.height, pdfDimension);
+
+            var dim = {
+              height: (pdfDimension.height-s2[1]),
+              width: s2[0],
+              left: s1[0],
+              top : s2[1]-s1[1]
+            };
+            if($scope.page == hBlock.page &&
+                y <= dim.top + dim.height + seuil &&
+                y >= dim.top - seuil &&
+                x >= dim.left - seuil &&
+                x <= dim.left + dim.width + seuil ){
+              //console.log('('+y+','+x+')', '('+(dim.top - seuil)+','+(dim.left - seuil)+')', '('+(dim.top + dim.height + seuil)+','+(dim.left + dim.width + seuil)+')', hBlock);
+              for (var i = hBlock.elements.length - 1; i >= 1; i--) {
+                var e = hBlock.elements[i];
+                if(e.left >= x && hBlock.elements[i-1].left <= x ) {
+                  $scope.currentElem.line = (i!=(hBlock.elements.length - 3)?hBlock.elements[i+1].line:e.line);
+                  $scope.$parent.$parent.goToLine($scope.currentElem.line);
+                  $scope.$apply();
+                  return;
+                }
+              }
+              if(hBlock.elements[1]) {
+                $scope.currentElem.line = hBlock.elements[1].line;
+                $scope.$parent.$parent.goToLine(hBlock.elements[1].line);
+                $scope.$apply();
+                return;
+              }
+              break;
+            }
+          }
+        };
+        $scope.getUrlVignette = function () {
+          return PaperService.getPNGUrl($scope.paperId,$scope.page);
         };
       },
       'link': function($scope, element, attrs, controller) {
@@ -238,11 +302,6 @@ angular.module('bluelatex.Latex.Directives.Vignette', [])
           $scope.currentLine = value;
         });
 
-        element.on('mousemove', function(event) {
-          // Prevent default dragging of selected content
-          event.preventDefault();
-        });
-
         var timeoutIDResize = null;
         $window.onresize = function () {
           clearTimeout(timeoutIDResize);
@@ -257,82 +316,6 @@ angular.module('bluelatex.Latex.Directives.Vignette', [])
           $scope.loadImage(element);
         }
       },
-      'template': '<img src="{{url}}.png?page={{page}}&revision={{revision}}&density=72" ng-if="type==\'image\'"><canvas ng-if="type==\'pdf\'"></canvas><div class="textLayer" ng-if="type==\'pdf\'"></div><div class="hightlights" ng-if="synctex"><div class="hightlight_line" ng-repeat="hightlight in hightlights" style="height:{{hightlight.height}};width:{{hightlight.width}};left:{{hightlight.left}};top:{{hightlight.top}}"></div></div>'
-    };
-  }])
-  .directive('blVignette2',['$document','$window', function($document,$window) {
-    return function($scope, elem, attr) {
-      var seuil = 1;
-
-      var ratio = 1;
-      var page = attr.page;
-      var synctex = null;
-      var scale = attr.scale;
-
-      attr.$observe('scale', function(val){
-        scale = val;
-        // TODO: update scale
-      });
-
-
-      if(attr.type == 'pdf') {
-        $scope.$watch('block', function (value) {
-          for (var i = elem[0].getElementsByClassName('cursor').length - 1; i >= 0; i--) {
-            elem[0].removeChild(elem[0].getElementsByClassName('cursor')[i]);
-          }
-          if(value != null) {
-
-            if(value[0].page == page) {
-              var x = value[0].block.xPosition* ratio;
-              var y = value[0].block.yPosition* ratio;
-
-              var cursor = $document[0].createElement("div");
-              cursor.style.position = 'absolute';
-              cursor.classList.add("cursor");
-              cursor.style.top = (value[0].block.yPosition/65536)*ratio+"pt";
-              cursor.style.left = (value[0].block.xPosition/65536)*ratio+"pt";
-              cursor.style.width = "12px";
-              cursor.style.height = "12px";
-              cursor.style.background='red';
-              elem[0].appendChild(cursor);
-              return;
-            }
-          }
-        });
-
-        elem[0].onmousemove = function (event) {
-          if($scope.synctex == null) return;
-          var x=event.x-findPosX(elem[0]);
-          var y=event.y-findPosY(elem[0]);
-          for (var i = $scope.synctex.hBlocks.length - 1; i >= 0; i--) {
-            var hBlock = $scope.synctex.hBlocks[i];
-            if(page == hBlock.page &&
-                y <= viewport.height - hBlock.bottom + seuil &&
-                y >= viewport.height - hBlock.bottom - hBlock.height - seuil &&
-                x >= hBlock.left - seuil &&
-                x <= hBlock.left+hBlock.width + seuil ){
-              //console.log('('+event.offsetY+','+event.offsetX+')', '('+(viewport.height-hBlock.bottom-hBlock.height - seuil)+','+(hBlock.left - seuil)+')', '('+(viewport.height-hBlock.bottom+seuil)+','+(hBlock.left+hBlock.width - seuil)+')', hBlock);
-              for (var i = hBlock.elements.length - 1; i >= 1; i--) {
-                var element = hBlock.elements[i];
-                if(element.left >= x && hBlock.elements[i-1].left <= x ) {
-                  $scope.currentElem = (i!=(hBlock.elements.length - 3)?hBlock.elements[i+1]:element);
-                  $scope.$apply();
-                  return;
-                }
-              }
-              if(hBlock.elements[1]) {
-                $scope.currentElem = hBlock.elements[1];
-                $scope.$apply();
-                return;
-              }
-              break;
-            }
-          }
-          $scope.currentElem = {};
-          $scope.$apply();
-        };
-
-        loadPdf(attr.url+'_'+page);
-      }
+      'template': '<img src="{{getUrlVignette()}}" ng-if="type==\'image\'"><canvas ng-if="type==\'pdf\'"></canvas><div class="textLayer" ng-if="type==\'pdf\'"></div><div class="hightlights" ng-if="synctex"><div class="hightlight_line" ng-repeat="hightlight in hightlights" style="height:{{hightlight.height}};width:{{hightlight.width}};left:{{hightlight.left}};top:{{hightlight.top}}"></div></div>'
     };
   }]);
