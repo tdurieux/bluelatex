@@ -93,8 +93,12 @@ angular.module('bluelatex.Paper.Controllers.Paper', ['angularFileUpload','bluela
     function ($rootScope,$scope, localize, $location, AceService, PaperService, $routeParams, $upload, $log,MessagesService,SyncTexParserService) {
       var paper_id = $routeParams.id;
 
+      $scope.paperId = paper_id;
       $scope.pageViewport = {};
-      $scope.currentElem = {};
+
+      $scope.currentLine = 0;
+      $scope.currentPage = 1;
+
       $scope.resources = [];
       $scope.paper = {};
       $scope.listType = 'debug';
@@ -104,15 +108,13 @@ angular.module('bluelatex.Paper.Controllers.Paper', ['angularFileUpload','bluela
       $scope.content = '';
       $scope.new_file = {};
       $scope.synctex = null;
-      $scope.current = {line: 0};
       $scope.zipURL = PaperService.getZipUrl(paper_id);
       $scope.pdfURL = PaperService.getPDFUrl(paper_id);
 
-      $scope.vignetteType = "image";
+      $scope.vignetteType = "pdf";
       $scope.urlPaper = PaperService.getPaperUrlRoot(paper_id);
       $scope.scale = "auto";
-      $scope.currentPage = 1;
-      $scope.totalPage = 0;
+      $scope.totalPage = 1;
 
       $scope.revision=Math.random();
 
@@ -122,10 +124,18 @@ angular.module('bluelatex.Paper.Controllers.Paper', ['angularFileUpload','bluela
       var getSyncTex = function () {
         PaperService.getSynctex(paper_id).then(function (data) {
           $scope.synctex = SyncTexParserService.parse(data);
-          $scope.totalPage = $scope.synctex.numberPages;
           $scope.$apply(function () {
             $scope.synctex = $scope.synctex;
           });
+        });
+      };
+
+      /**
+      * Get the number of page of the paper
+      */
+      var getPages = function () {
+        PaperService.getPages(paper_id).then(function (data) {
+          $scope.totalPage = data[0];
         });
       };
 
@@ -145,7 +155,6 @@ angular.module('bluelatex.Paper.Controllers.Paper', ['angularFileUpload','bluela
               type: (error.level=="error")?"error":'warning' // also warning and information
             });
           }
-          console.log(annotations);
           AceService.getSession().setAnnotations(annotations);
         });
       };
@@ -223,11 +232,13 @@ angular.module('bluelatex.Paper.Controllers.Paper', ['angularFileUpload','bluela
           }
         });
       };
+
       /**
       * Close connection on leaving
       */
       $scope.$on('$routeChangeSuccess', function(next, current) {
-        if($scope.paper.authors.indexOf($rootScope.loggedUser.name) >= 0) {
+        if($scope.paper.authors &&
+           $scope.paper.authors.indexOf($rootScope.loggedUser.name) >= 0) {
           clearInterval(updateTexInterval);
           PaperService.leavePaper(paper_id).then(function (data) {
 
@@ -241,6 +252,7 @@ angular.module('bluelatex.Paper.Controllers.Paper', ['angularFileUpload','bluela
       var updateTexInterval = 0;
       var getPaperInfo = function () {
         PaperService.getInfo(paper_id).then(function (data) {
+          getPages();
           $scope.paper = data;
           $scope.paper.etag = data.header.etag;
           if($scope.paper.authors.indexOf($rootScope.loggedUser.name) >= 0) {
@@ -250,6 +262,7 @@ angular.module('bluelatex.Paper.Controllers.Paper', ['angularFileUpload','bluela
             getSynchronizedFiles();
             getResources();
             getSyncTex();
+
           }
         }, function (error) {
           MessagesService.clear();
@@ -297,9 +310,9 @@ angular.module('bluelatex.Paper.Controllers.Paper', ['angularFileUpload','bluela
       */
       $scope.compile = function () {
         PaperService.subscribePaperCompiler(paper_id).then(function (data) {
-          console.log(data);
           getLog();
           getSyncTex();
+          getPages();
           $scope.revision++;
         }, function (error) {
           getLog();
@@ -339,7 +352,7 @@ angular.module('bluelatex.Paper.Controllers.Paper', ['angularFileUpload','bluela
       */
       $scope.goToLine = function (line) {
         AceService.goToLine(line);
-        $scope.current.line = line;
+        $scope.currentLine = line;
       };
 
       /**
@@ -353,12 +366,14 @@ angular.module('bluelatex.Paper.Controllers.Paper', ['angularFileUpload','bluela
           });
           _editor.selection.on("changeCursor", function(){
             $scope.$apply(function() {
-              $scope.current.line = _editor.selection.getCursor().row+1;
+              $scope.currentLine = _editor.selection.getCursor().row+1;
               if(!$scope.synctex) return;
-              if(!$scope.synctex.blockNumberLine[$scope.current.line]) return;
-              $scope.currentPage = $scope.synctex.blockNumberLine[$scope.current.line][0].page;
+              if(!$scope.synctex.blockNumberLine[$scope.currentLine]) return;
+              $scope.currentPage = $scope.synctex.blockNumberLine[$scope.currentLine][0].page;
             });
           });
+          mobwrite.syncUsername = $rootScope.loggedUser.name;
+          mobwrite.share(paper_id);
           _editor.focus();
         });
       };
