@@ -1,6 +1,3 @@
-/**
-*
-*/
 angular.module('bluelatex.Latex.Directives.Vignette', ['bluelatex.Paper.Services.Paper'])
   .directive('blVignette', ['$window','PaperService', function($window,PaperService) {
     return {
@@ -23,19 +20,19 @@ angular.module('bluelatex.Latex.Directives.Vignette', ['bluelatex.Paper.Services
 
         $scope.hightlights = [];
 
-        var lineChange = function (line) {
+        $scope.$watch("currentLine", function (line) {
+          if(!line) return;
           $scope.hightlights = [];
-
-          // Check if the synctex file is loaded
           if(!pdfDimension) return;
           if(!$scope.synctex) return;
           if(!$scope.synctex.blockNumberLine) return;
           if(!$scope.synctex.blockNumberLine[line]) return;
           var elems = $scope.synctex.blockNumberLine[line];
+
           if(!isArray(elems) || !elems[0]) return;
 
           var lines = [];
-          var currentLine = {
+          var cLine = {
             positionFirst: 0,
             minLeft: 0,
             maxLeft: 0,
@@ -43,14 +40,13 @@ angular.module('bluelatex.Latex.Directives.Vignette', ['bluelatex.Paper.Services
             height: elems[0].height
           };
 
-
           for (var i = elems.length - 1; i >= 0; i--) {
             var e=elems[i];
             if(e.page != $scope.page) continue;
             //if(e.type!='x') continue;
-            if(e.bottom!=currentLine.bottom){
-              lines.push(currentLine);
-              currentLine = {
+            if(e.bottom!=cLine.bottom){
+              lines.push(cLine);
+              cLine = {
                 positionFirst: i,
                 minLeft: i,
                 maxLeft: i,
@@ -59,17 +55,17 @@ angular.module('bluelatex.Latex.Directives.Vignette', ['bluelatex.Paper.Services
               };
               continue;
             }
-            if(e.left < elems[currentLine.minLeft].left) {
-              currentLine.minLeft = i;
-              currentLine.positionFirst = i - currentLine.positionFirst;
-            } else if(e.left > elems[currentLine.maxLeft].left) {
-              currentLine.maxLeft = i;
+            if(e.left < elems[cLine.minLeft].left) {
+              cLine.minLeft = i;
+              cLine.positionFirst = i - cLine.positionFirst;
+            } else if(e.left > elems[cLine.maxLeft].left) {
+              cLine.maxLeft = i;
             }
-            if(e.height>currentLine.height) {
-              currentLine.height=e.height;
+            if(e.height>cLine.height) {
+              cLine.height=e.height;
             }
           }
-          lines.push(currentLine);
+          lines.push(cLine);
 
           for (var i = lines.length - 1; i >= 0; i--) {
             var line = lines[i];
@@ -98,17 +94,19 @@ angular.module('bluelatex.Latex.Directives.Vignette', ['bluelatex.Paper.Services
               top :pdfDimension.height-s1[1]-(pdfDimension.height-s2[1]) + 'px'
             });
           }
-        };
-
-        $scope.$watch("currentLine", lineChange);
+        });
 
         function loadPdf(pdfURI) {
             PDFJS.getDocument(pdfURI).then(renderPdf);
         }
 
+        function loadImage (imageURI) {
+
+        }
+
         function renderPdf(p) {
           pdf = p;
-          pdf.getPage(1).then(renderPage);
+          pdf.getPage($scope.page).then(renderPage);
         }
 
         function renderPage(page) {
@@ -175,9 +173,6 @@ angular.module('bluelatex.Latex.Directives.Vignette', ['bluelatex.Paper.Services
           });
         }
 
-        /**
-        * Resize the vignette
-        */
         $scope.resize = function (e) {
           element = e;
           if(pdf) {
@@ -194,17 +189,11 @@ angular.module('bluelatex.Latex.Directives.Vignette', ['bluelatex.Paper.Services
           }
         };
 
-        /**
-        * Load a PDF
-        */
         $scope.loadPDF = function (e) {
           element = e;
           element.on('click', getCurrentLine);
           loadPdf(PaperService.getPDFUrl($scope.paperId,$scope.page));
         };
-        /**
-        * Load an image
-        */
         $scope.loadImage = function (e) {
           element = e;
           element.on('click', getCurrentLine);
@@ -218,16 +207,11 @@ angular.module('bluelatex.Latex.Directives.Vignette', ['bluelatex.Paper.Services
             };
           },500);
         };
-
-        /**
-        * Get the first line of the page
-        */
         var seuil = 2;
         var getCurrentLine = function(event) {
           if($scope.synctex == null) return;
           var x=event.layerX;
           var y=event.layerY;
-          console.log(x,y,pdfDimension)
           for (var i = $scope.synctex.hBlocks.length - 1; i >= 0; i--) {
             var hBlock = $scope.synctex.hBlocks[i];
 
@@ -249,14 +233,14 @@ angular.module('bluelatex.Latex.Directives.Vignette', ['bluelatex.Paper.Services
               for (var i = hBlock.elements.length - 1; i >= 1; i--) {
                 var e = hBlock.elements[i];
                 if(e.left >= x && hBlock.elements[i-1].left <= x ) {
-                  $scope.currentElem.line = (i!=(hBlock.elements.length - 3)?hBlock.elements[i+1].line:e.line);
+                  //$scope.currentLine = (i!=(hBlock.elements.length - 3)?hBlock.elements[i+1].line:e.line);
                   $scope.$parent.$parent.goToLine($scope.currentElem.line);
                   $scope.$apply();
                   return;
                 }
               }
               if(hBlock.elements[1]) {
-                $scope.currentElem.line = hBlock.elements[1].line;
+                //$scope.currentLine = hBlock.elements[1].line;
                 $scope.$parent.$parent.goToLine(hBlock.elements[1].line);
                 $scope.$apply();
                 return;
@@ -265,6 +249,7 @@ angular.module('bluelatex.Latex.Directives.Vignette', ['bluelatex.Paper.Services
             }
           }
         };
+
         $scope.getUrlVignette = function () {
           return PaperService.getPNGUrl($scope.paperId,$scope.page);
         };
@@ -274,6 +259,10 @@ angular.module('bluelatex.Latex.Directives.Vignette', ['bluelatex.Paper.Services
         var page = attrs.page;
         var scale = attrs.scale;
 
+        if(attrs.vignettetype == "image" ||  attrs.vignettetype == "pdf" ) {
+          $scope.type = attrs.vignettetype;
+        }
+
         var timeoutIDscale = null;
         $scope.$watch("scale", function(val){
           if(!val)return;
@@ -281,6 +270,10 @@ angular.module('bluelatex.Latex.Directives.Vignette', ['bluelatex.Paper.Services
           timeoutIDscale = setTimeout(function () {
             $scope.resize(element);
           },500);
+        });
+
+        $scope.$watch("currentLine", function(val){
+          console.log("ligne", val)
         });
 
         attrs.$observe("scale", function(val){
@@ -299,7 +292,7 @@ angular.module('bluelatex.Latex.Directives.Vignette', ['bluelatex.Paper.Services
         });
 
         attrs.$observe("line",function (value) {
-          $scope.currentLine = value;
+          //$scope.currentLine = value;
         });
 
         var timeoutIDResize = null;
