@@ -91,6 +91,9 @@
 .icon-folder-open:before {
   content: "r";
 }
+.icon-github:before {
+  content: "s";
+}
 
 * {
     -moz-box-sizing: border-box;
@@ -218,6 +221,23 @@ header {
   width: 0;
   float: right;
   height: 0;
+}
+#github {
+  float: right;
+}
+#github > span {
+  position: relative;
+  color: #F3F3F3;
+  font-size: 28px;
+  top: 5px;
+}
+#github > a {
+  position: relative;
+  color:#F3F3F3;
+  padding: 4px;
+  top: -2px;
+  padding-right: 11px;
+  line-height: 40px;
 }
 header .logo{
     padding: 0 10px;

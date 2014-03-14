@@ -248,7 +248,7 @@ div.preview_page_container img {
 .subOption > label input {
     display: none;
 }
-.options .option {
+#paper > .options .option {
     position: relative;
     height: 100%;
     float: left;
