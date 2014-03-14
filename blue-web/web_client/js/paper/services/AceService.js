@@ -133,12 +133,13 @@ angular.module('bluelatex.Paper.Services.Ace', ['ngStorage','ui.ace','bluelatex.
         * @param {Node} node A textarea, text or password input.
         * @constructor
         */
-        mobwrite.shareAceObj = function(paper_id) {
+        mobwrite.shareAceObj = function(paper) {
           // Call our prototype's constructor.
-          mobwrite.shareObj.apply(this, [paper_id]);
-          mobwrite.syncGateway = apiRootUrl + "/papers/" + paper_id + "/q";
-          this.file = paper_id + ".tex";
-          this.element = paper_id;
+          mobwrite.debug=true;
+          mobwrite.shareObj.apply(this, [paper.file]);
+          mobwrite.syncGateway = apiRootUrl + "/papers/" + paper.paper_id + "/q";
+          this.file = paper.file;
+          this.element = paper.file;
         };
 
         // The textarea shared object's parent is a shareObj.
@@ -159,8 +160,7 @@ angular.module('bluelatex.Paper.Services.Ace', ['ngStorage','ui.ace','bluelatex.
          * @param {string} text New text
          */
         mobwrite.shareAceObj.prototype.setClientText = function(text) {
-          _editor.setContent(text);
-          this.fireChange(this.element);
+          _session.setValue(text);
         };
 
 
@@ -340,9 +340,24 @@ angular.module('bluelatex.Paper.Services.Ace', ['ngStorage','ui.ace','bluelatex.
             // No cursor; the element may be "display:none".
             return null;
           }*/
-          cursor.range = _editor.selection.geRange();
+          cursor.range = _editor.selection.getRange();
           cursor.cursor = _editor.selection.getCursor();
-          /*
+
+          var splittedContent = content.split('\n');
+          var count = cursor.range.start.column;
+          for(var i =0 ; i<cursor.range.start.row; i++) {
+            count+=splittedContent[i].length;
+          }
+          selectionStart = count;
+          count = cursor.range.end.column;
+          for(var i =0 ; i<cursor.range.end.row; i++) {
+            count+=splittedContent[i].length;
+          }
+          selectionEnd = count;
+
+          cursor.scrollTop = _editor.session.getScrollTop();
+          cursor.scrollLeft = _editor.session.getScrollLeft();
+
           cursor.startPrefix = text.substring(selectionStart - padLength, selectionStart);
           cursor.startSuffix = text.substring(selectionStart, selectionStart + padLength);
           cursor.startOffset = selectionStart;
@@ -352,13 +367,6 @@ angular.module('bluelatex.Paper.Services.Ace', ['ngStorage','ui.ace','bluelatex.
             cursor.endSuffix = text.substring(selectionEnd, selectionEnd + padLength);
             cursor.endOffset = selectionEnd;
           }
-
-
-          // Record scrollbar locations
-          if ('scrollTop' in this.element) {
-            cursor.scrollTop = this.element.scrollTop / this.element.scrollHeight;
-            cursor.scrollLeft = this.element.scrollLeft / this.element.scrollWidth;
-          }*/
           return cursor;
         };
 
@@ -379,7 +387,7 @@ angular.module('bluelatex.Paper.Services.Ace', ['ngStorage','ui.ace','bluelatex.
           var newText = content;
 
           // Find the start of the selection in the new text.
-          /*var pattern1 = cursor.startPrefix + cursor.startSuffix;
+          var pattern1 = cursor.startPrefix + cursor.startSuffix;
           var pattern2, diff;
           var cursorStartPoint = this.dmp.match_main(newText, pattern1,
               cursor.startOffset - padLength);
@@ -423,16 +431,36 @@ angular.module('bluelatex.Paper.Services.Ace', ['ngStorage','ui.ace','bluelatex.
             cursorEndPoint = cursorStartPoint;
           }
 
+          var splittedText = newText.split('\n');
+          var count = 0;
+          var startRow = 0;
+          var startCol = 0;
+          var startFound = false;
+
+          var endRow = 0;
+          var endCol = 0;
+
+          for (var i = 0; i < splittedText.length; i++) {
+            if(count+splittedText[i].length > cursorStartPoint && !startFound) {
+              startRow = i;
+              startCol = cursorStartPoint -count;
+              startFound = true;
+            }
+            if(count+splittedText[i].length > cursorEndPoint) {
+              endRow = i;
+              endCol = cursorEndPoint -count;
+              break;
+            }
+            count+=splittedText[i].length;
+          }
+          var Range = ace.require('ace/range').Range;
+
           // Restore selection.
-          _editor.selection.setRange(new Rage())
-          //this.element.selectionStart = cursorStartPoint;
-          //this.element.selectionEnd = cursorEndPoint;
+          _editor.selection.setRange(new Range(startRow,startCol,endRow,endCol));
 
           // Restore scrollbar locations
-          if ('scrollTop' in cursor) {
-            this.element.scrollTop = cursor.scrollTop * this.element.scrollHeight;
-            this.element.scrollLeft = cursor.scrollLeft * this.element.scrollWidth;
-          }*/
+          _editor.session.setScrollTop(cursor.scrollTop);
+          _editor.session.setScrollLeft(cursor.scrollLeft);
         };
 
 
@@ -463,7 +491,7 @@ angular.module('bluelatex.Paper.Services.Ace', ['ngStorage','ui.ace','bluelatex.
         mobwrite.shareHandlers.push(mobwrite.shareAceObj.shareHandler);
       };
 
-      if(window['mobwrite'] != null) {
+      if(window.mobwrite != null) {
         initMobWrite();
       }
 
