@@ -136,6 +136,12 @@
   #paper .leftCol {
     display: none;
   }
+  #paper .top.options .center {
+    left: 0;
+  }
+  #paper .top> .left {
+    display: none;
+  }
   #paper .centerRightCol {
     padding-left: 0!important;
   }

@@ -193,18 +193,18 @@ div.preview_page_container img {
     z-index: 99;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
-#paper .options > .left {
+#paper .top.options > .left {
     width: 215px;
     float: left;
 }
-#paper .options .center {
+#paper .top.options .center {
     position: absolute;
     top: 0;
     bottom: 0;
     left: 215px;
     right: 0;
 }
-#paper .options .center .left,#paper .options .center .right  {
+#paper .top.options .center .left,#paper .top.options .center .right  {
     position: relative;
     width: 50%;
     float: left;
@@ -224,15 +224,54 @@ div.preview_page_container img {
     -ms-user-select: none;      /* IE 10+ */
     -o-user-select: none;
     user-select: none;
+    cursor: pointer;
 }
 .subOption .subOptions {
     background: #FAFAFA;
+    margin-left: -7px;
+    position: fixed;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+    z-index: 0;
+    border-radius: 0 0 2px 2px;
+}
+.subOption .subOptions div {
+    padding: 3px 7px;
+    border-bottom: 1px solid #DDD;
+    cursor: pointer;
+}
+div.subOptions > div:last-child {
+    border: 0;
+}
+.subOption .subOptions div:hover {
+    background: #DDD;
+}
+.subOption .bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
 }
 .subOption .label {
+    position: relative;
     display: inline-block;
-    line-height: 40px;
 }
-
+.subOption .label > span{
+  line-height: 40px;
+}
+.subOption .label > span.has_sub_label  {
+  position: relative;
+  top: -7px;
+}
+.sub_label {
+  position: absolute;
+  bottom: 3px;
+  color: #9E9E9E;
+  font-size: 12px;
+  text-align: center;
+  width: 100%;
+}
 .subOption > label {
     cursor: pointer;
     padding: 11px 0px;
@@ -248,7 +287,7 @@ div.preview_page_container img {
 .subOption > label input {
     display: none;
 }
-#paper > .options .option {
+#paper .top.options .option {
     position: relative;
     height: 100%;
     float: left;
