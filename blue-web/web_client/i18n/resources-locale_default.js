@@ -418,5 +418,26 @@
         "key":"_Role_",
         "value":"Role",
         "description":"Role"
+    },
+    {
+        "key":"_Install_itsalltext_",
+        "value":"Please install <a href='https://addons.mozilla.org/fr/firefox/addon/its-all-text/'>It's all text</a>",
+        "description":"itsalltext not present invit to install it"
+    },
+    {
+        "key":"_New_resource_",
+        "value":"Upload a resource",
+        "description":"Upload a new Resource tiltle"
+    },
+    {
+        "key":"_Resources_",
+        "value":"Resources",
+        "description":"Resources"
+    },
+    {
+        "key":"_No_resource_found_",
+        "value":"No resource found",
+        "description":"No resource found"
     }
+
 ]
