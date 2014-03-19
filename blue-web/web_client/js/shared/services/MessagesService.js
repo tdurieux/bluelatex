@@ -1,7 +1,7 @@
 'use strict';
 angular.module('bluelatex.Shared.Services.Messages', [])
-  .factory("MessagesService", ['localize',
-    function (localize) {
+  .factory("MessagesService", ['localize','$sce',
+    function (localize,$sce) {
       var errors = [];
       var messages = [];
       var warnings = [];
@@ -22,14 +22,17 @@ angular.module('bluelatex.Shared.Services.Messages', [])
         }
         return tempMessage;
       };
+      function pushMessage(array, m) {
+        array.push($sce.trustAsHtml(getMessageLocalized(m)));
+      }
       function error (m, err) {
-        errors.push(getMessageLocalized(m));
+        pushMessage(errors,m);
       }
       function message (m, mess) {
-        messages.push(getMessageLocalized(m));
+        pushMessage(messages,m);
       }
       function warning (m, wra) {
-        warnings.push(getMessageLocalized(m));
+        pushMessage(warnings,m);
       }
       function clean () {
         errors.splice(0,errors.length);
