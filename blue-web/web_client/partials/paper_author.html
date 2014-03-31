@@ -157,6 +157,17 @@
           <div class="file" ng-if="synchronizedFiles.length == 0" data-i18n="_No_synchronized_file_found_"></div>
         </div>
       </div>
+      <section id="new_file">
+        <h3 data-i18n="_New_file_">New file</h3>
+        <label id="new_file">
+          <input type="text" ng-model="new_file_name" data-i18n-attr="_Filename_|placeholder">
+          <select ng-model="new_file_extension">
+            <option value=".tex" selected>.tex</option>
+            <option value=".bib">.bib</option>
+          </select>
+          <button class="button" ng-disabled="new_file_name==null || new_file_name=''" ng-click="newFile(new_file_name+new_file_extension)" data-i18n="_New_file_"></button>
+        </label>
+      </section>
       <section id="upload_resource" ng-file-drop="onFileSelect($files)" ng-file-drag-over-class="file-hover">
         <h3 data-i18n="_New_resource_">New Resource</h3>
         <label id="new_file">
