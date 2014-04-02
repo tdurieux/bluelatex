@@ -438,6 +438,75 @@
         "key":"_No_resource_found_",
         "value":"No resource found",
         "description":"No resource found"
+    },
+    {
+        "key":"_Compile_",
+        "value":"Compile",
+        "description":"Compile"
+    },
+    {
+        "key":"_Compiler_",
+        "value":"Compiler",
+        "description":"Compiler"
+    },
+    {
+        "key":"_Download_",
+        "value":"Download",
+        "description":"Download"
+    },
+    {
+        "key":"_Download_ZIP_",
+        "value":"Download ZIP",
+        "description":"Download ZIP"
+    },
+    {
+        "key":"_Download_Log_",
+        "value":"Download Log",
+        "description":"Download log"
+    },
+    {
+        "key":"_Download_PDF_",
+        "value":"Download PDF",
+        "description":"Download PDF"
+    },
+    {
+        "key":"_Emacs_users_",
+        "value":"Emacs users",
+        "description":"Emacs users"
+    },
+    {
+        "key":"_Interval_",
+        "value":"Interval",
+        "description":"Interval"
+    },
+    {
+        "key":"_Upload_",
+        "value":"Upload",
+        "description":"Upload"
+    },
+    {
+        "key":"_Cancel_upload_",
+        "value":"Cancel upload",
+        "description":"Cancel upload"
+    },
+    {
+        "key":"_Select_a_file_",
+        "value":"Select a file",
+        "description":"Select a file"
+    },
+    {
+        "key":"_or_drag_a_file_",
+        "value":"or drag a file",
+        "description":"or drag a file"
+    },
+    {
+        "key":"_New_file_",
+        "value":"New file",
+        "description":"New file"
+    },
+    {
+        "key":"_Filename_",
+        "value":"Filename",
+        "description":"Filename"
     }
-
 ]
