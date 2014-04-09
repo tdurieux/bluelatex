@@ -182,6 +182,7 @@ angular.module('bluelatex', [
           $location.path("/");
         }
       }
+      ga('send', 'pageview', next.path);
     });
   }
 ]);
