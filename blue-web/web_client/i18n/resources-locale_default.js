@@ -508,5 +508,15 @@
         "key":"_Filename_",
         "value":"Filename",
         "description":"Filename"
+    },
+    {
+        "key":"_Errors_",
+        "value":"Errors",
+        "description":"Errors"
+    },
+    {
+        "key":"_Warnings_",
+        "value":"Warnings",
+        "description":"Warnings"
     }
 ]
