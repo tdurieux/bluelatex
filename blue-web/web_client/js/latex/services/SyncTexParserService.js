@@ -37,7 +37,10 @@ angular.module("bluelatex.Latex.Services.SyncTexParser", [])
           //input files
           match = line.match(inputPatern);
           if(match) {
-            files[match[1]] = match[2];
+            files[match[1]] = {
+              path: match[2],
+              name: match[2].replace(/^.*[\\\/]/, '')
+            };
             continue;
           }
 
@@ -157,11 +160,13 @@ angular.module("bluelatex.Latex.Services.SyncTexParser", [])
               width: width,
               page: currentPage.page
             };
-
-            if(blockNumberLine[lineNumber] == null) {
-              blockNumberLine[lineNumber]= [];
+            if(blockNumberLine[elem.file.name] == null) {
+              blockNumberLine[elem.file.name] = [];
             }
-            blockNumberLine[lineNumber].push(elem);
+            if(blockNumberLine[elem.file.name][lineNumber] == null) {
+              blockNumberLine[elem.file.name][lineNumber]= [];
+            }
+            blockNumberLine[elem.file.name][lineNumber].push(elem);
             currentElement.elements.push(elem);
             continue;
           }
