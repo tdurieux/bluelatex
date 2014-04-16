@@ -97,6 +97,7 @@ angular.module('bluelatex.Latex.Directives.Vignette', ['bluelatex.Paper.Services
               top :pdfDimension.height-s1[1]-(pdfDimension.height-s2[1]) + 'px'
             });
           }
+          $scope.$apply();
         };
 
         $scope.$watch("currentLine", function (line) {
@@ -390,7 +391,7 @@ angular.module('bluelatex.Latex.Directives.Vignette', ['bluelatex.Paper.Services
         $scope.$watch("currentPage", function (val) {
           if(!val)return;
           if(val == page) {
-            element[0].parentElement.scrollTop = element[0].offsetTop;
+            element[0].parentElement.scrollTop = element[0].offsetTop -10;
           }
         });
 
