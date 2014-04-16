@@ -23,13 +23,13 @@ angular.module("bluelatex.Latex.Services.SyncTexParser", [])
 
         var inputPatern = /Input:([0-9]+):(.+)/;
         var offsetPatern = /(X|Y) Offset:([0-9]+)/;
-        var openPagePatern = /\{([0-9]+)/;
-        var closePagePatern = /\}([0-9]+)/;
+        var openPagePatern = /\{([0-9]+)$/;
+        var closePagePatern = /\}([0-9]+)$/;
         var verticalBlockPatern = /\[([0-9]+),([0-9]+):([0-9]+),([0-9]+):([0-9]+),([0-9]+),([0-9]+)/;
-        var closeVerticalBlockPatern = /\]/;
+        var closeVerticalBlockPatern = /\]$/;
         var horizontalBlockPatern = /\(([0-9]+),([0-9]+):([0-9]+),([0-9]+):([0-9]+),([0-9]+),([0-9]+)/;
-        var closeHorizontalBlockPatern = /\)/;
-        var elementBlockPatern = /(.)([0-9]+),([0-9]+):([0-9]+),([0-9]+)(:?([0-9]+))?/;
+        var closeHorizontalBlockPatern = /\)$/;
+        var elementBlockPatern = /(.)([0-9]+),([0-9]+):([0-9]+),([0-9]+)(:?(-?[0-9]+))?/;
 
         for (var i = 1; i < lineArray.length; i++) {
           var line = lineArray[i];
@@ -101,8 +101,10 @@ angular.module("bluelatex.Latex.Services.SyncTexParser", [])
           // close V block
           match = line.match(closeVerticalBlockPatern);
           if(match) {
-            currentElement.parent.blocks.push(currentElement);
-            currentElement = currentElement.parent;
+            if(currentElement.parent != null) {
+              currentElement.parent.blocks.push(currentElement);
+              currentElement = currentElement.parent;
+            }
             continue;
           }
 
@@ -133,8 +135,10 @@ angular.module("bluelatex.Latex.Services.SyncTexParser", [])
           // close H block
           match = line.match(closeHorizontalBlockPatern);
           if(match) {
-            currentElement.parent.blocks.push(currentElement);
-            currentElement = currentElement.parent;
+            if(currentElement.parent!=null) {
+              currentElement.parent.blocks.push(currentElement);
+              currentElement = currentElement.parent;
+            }
             continue;
           }
 
@@ -167,7 +171,8 @@ angular.module("bluelatex.Latex.Services.SyncTexParser", [])
               blockNumberLine[elem.file.name][lineNumber]= [];
             }
             blockNumberLine[elem.file.name][lineNumber].push(elem);
-            currentElement.elements.push(elem);
+            if(currentElement.elements != null)
+              currentElement.elements.push(elem);
             continue;
           }
         }
