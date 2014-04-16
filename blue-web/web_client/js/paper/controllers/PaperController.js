@@ -86,7 +86,7 @@ angular.module('bluelatex.Paper.Controllers.Paper', ['angularFileUpload','bluela
       */
       var getPages = function () {
         PaperService.getPages(paper_id).then(function (data) {
-          $scope.totalPage = data[0];
+          $scope.totalPage = data.response;
           if($scope.currentPage == 0)
             $scope.currentPage = 1;
         });
@@ -273,28 +273,16 @@ angular.module('bluelatex.Paper.Controllers.Paper', ['angularFileUpload','bluela
         });
       };
 
-      $scope.displaySyncTex = function() {
-        $scope.displaySyncTexBox = !$scope.displaySyncTexBox;
-        if($scope.displaySyncTexBox) {
-displayPages($scope.synctex.pages);
-        } else {
-          removeBlocks();
-        }
-      };
-
-      $scope.$watch('displaySyncTexBox', function (value) {
-        if(value)
-          displayPages($scope.synctex.pages);
-        else
-          removeBlocks();
-      });
-
       //action listener: action in the menu
       $scope.$on('handleAction', function (event, data) {
         if ($scope[data]) {
           $scope[data]();
         }
       });
+
+      $scope.displaySyncTex = function() {
+        $scope.displaySyncTexBox = !$scope.displaySyncTexBox;
+      };
 
       $scope.changeFile = function (file) {
         if($scope.currentFile == file) return;
@@ -313,7 +301,7 @@ displayPages($scope.synctex.pages);
           if(syncFile.title == filename) {
             $scope.changeFile(syncFile);
           }
-        };
+        }
       };
 
       /**
