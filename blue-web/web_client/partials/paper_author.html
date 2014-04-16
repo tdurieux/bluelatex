@@ -161,9 +161,6 @@
       currentLine: {{currentLine}}<br>
       currentPage: {{currentPage}}<br>
       <label ng-click="displaySyncTex()">display SyncTex Box</label>
-      <div class="synctex">
-        {{synctex.blockNumberLine}}
-      </div>
     </div>
     <div class="figures" ng-switch-when="figures">
       <div class="figure" ng-repeat="n in range(totalPage) track by $index">
