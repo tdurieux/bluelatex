@@ -1,3 +1,4 @@
-couchdb := None
+startOptions <<= (startOptions, bluePack) map { (opt, pack) => "-cwd" :: pack.getCanonicalPath :: opt }
 
-couchPort := 5984
+launchExe := "/usr/bin/jsvc"
+
