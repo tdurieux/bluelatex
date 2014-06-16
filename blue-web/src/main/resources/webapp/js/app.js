@@ -23,6 +23,7 @@ angular.module('bluelatex', [
   'reCAPTCHA',
   'bluelatex.Paper.Controllers.InitPaper',
   'bluelatex.Paper.Controllers.LatexPaper',
+  'bluelatex.Paper.Controllers.MarkdownPaper',
   'bluelatex.Shared.Services.WindowActive',
   'bluelatex.Paper.Controllers.EditPaper',
   'bluelatex.Paper.Controllers.NewPaper',

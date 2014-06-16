@@ -84,8 +84,8 @@ angular.module('bluelatex.Paper.Controllers.InitPaper', ['bluelatex.Paper.Servic
         $rootScope.pageTitle = "Paper - " + paper.name;
 
         // change the type of paper
-        $scope.paperType = "latex";
-        //$scope.paperType = "markdown";
+        //$scope.paperType = "latex";
+        $scope.paperType = "markdown";
       }).then(function() {
         getPaperRoles().then(function(roles) {
           // change the status of the page

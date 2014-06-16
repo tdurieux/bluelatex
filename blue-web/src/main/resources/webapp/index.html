@@ -143,6 +143,12 @@
     loadConfig(function(config) {
       //blue web
       $script([
+        // Markdown,
+        'lib/showdown.min.js',
+        'js/paper/controllers/MarkdownPaperController.js',
+        'js/paper/directives/MarkdownDirective.js',
+        'js/paper/services/MarkdownService.js',
+        
         'js/shared/controllers/MenuController'+(debug?'':'.min')+'.js',
         'js/shared/controllers/MainController'+(debug?'':'.min')+'.js',
         'js/shared/controllers/MessagesController'+(debug?'':'.min')+'.js',
