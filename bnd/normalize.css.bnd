@@ -1,0 +1,2 @@
+Bundle-SymbolicName=org.webjars.normalize
+Fragment-Host=org.gnieh.blue.web

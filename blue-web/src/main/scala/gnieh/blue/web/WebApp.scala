@@ -38,14 +38,25 @@ class WebApp(context: BundleContext, config: Config) extends HApp {
     case _              => ""
   }
 
+  private val prefixAssets = config.getString("blue.client.path-assets") match {
+    case Prefix(prefixAssets) => prefixAssets
+    case _                    => ""
+  }
+
   private val configLet = new ConfigLet(context, config)
   private val webLet = new WebLet(context, prefix)
+  private val webJarLet = new WebJarLet(context, prefix, prefixAssets)
 
   private val configPath =
     s"${if(prefix.nonEmpty) prefix + "/" else ""}configuration"
 
+  private val webjarPrefix =
+    s"${if(prefix.nonEmpty) prefix + "/" else ""}${prefixAssets}/"
+
   def resolve(req: HReqData) =
-    if(req.uriPath == configPath)
+    if(req.uriPath.startsWith(webjarPrefix)) 
+      Some(webJarLet)
+    else if(req.uriPath == configPath)
       Some(configLet)
     else
       Some(webLet)

@@ -1,0 +1,2 @@
+Bundle-SymbolicName=org.webjars.ace
+Fragment-Host=org.gnieh.blue.web

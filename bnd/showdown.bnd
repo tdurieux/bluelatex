@@ -1,0 +1,2 @@
+Bundle-SymbolicName=org.webjars.showdown
+Fragment-Host=org.gnieh.blue.web

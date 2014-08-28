@@ -117,6 +117,16 @@ class BlueBuild extends Build with Pack with Server with Distrib with Tests {
     enablePlugins(SbtWeb)
     settings (
       libraryDependencies ++= commonDeps,
+      libraryDependencies ++= Seq(
+        "org.webjars" % "webjars-locator" % "0.17",
+        "org.webjars" % "ace" % "1.1.3",
+        "org.webjars" % "pdf-js" % "1.0.277",
+        "org.webjars" % "angularjs" % "1.2.23",
+        "org.webjars" % "angular-file-upload" % "1.6.5",
+        "org.webjars" % "angular-cache" % "3.0.2",
+        "org.webjars" % "normalize.css" % "3.0.1",
+        "org.webjars" % "showdown" % "0.3.1"
+      ),
       resourceGenerators in Compile += LessKeys.less.taskValue,
       includeFilter in (Assets, LessKeys.less) := "css.less",
       (LessKeys.compress in (Compile, LessKeys.less)) := true,

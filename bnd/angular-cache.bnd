@@ -1,0 +1,2 @@
+Bundle-SymbolicName=org.webjars.angular.cache
+Fragment-Host=org.gnieh.blue.web

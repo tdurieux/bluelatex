@@ -1,0 +1,2 @@
+Bundle-SymbolicName=org.webjars.angular.file.upload
+Fragment-Host=org.gnieh.blue.web
