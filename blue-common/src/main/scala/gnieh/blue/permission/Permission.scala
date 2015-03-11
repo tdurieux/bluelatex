@@ -53,6 +53,7 @@ object Permission {
     case "chat"         => Chat
     case "fork"         => Fork
     case "change-phase" => ChangePhase
+    case "view"         => View
     case _              => Custom(name)
   }
 
