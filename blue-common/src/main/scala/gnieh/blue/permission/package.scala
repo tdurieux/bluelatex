@@ -14,13 +14,22 @@
  * limitations under the License.
  */
 package gnieh.blue
-package permission
 
-/** A permission on paper that defines how certain user may interact on the paper
- *
- *  @author Lucas Satabin
- */
-final case class Permission(val name: String) {
-  def unapply(permissions: List[Permission]): Boolean =
-    permissions.contains(this)
+package object permission {
+
+  // some widely used 'built-in' permissions
+
+  val Publish = Permission("publish")
+  val Configure = Permission("configure")
+  val Edit = Permission("edit")
+  val Delete = Permission("delete")
+  val Compile = Permission("compile")
+  val Download = Permission("download")
+  val Read = Permission("read")
+  val View = Permission("view")
+  val Comment = Permission("comment")
+  val Chat = Permission("chat")
+  val Fork = Permission("fork")
+  val ChangePhase = Permission("change-phase")
+
 }
