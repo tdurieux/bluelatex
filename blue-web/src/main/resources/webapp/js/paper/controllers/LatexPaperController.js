@@ -41,6 +41,7 @@ angular.module('bluelatex.Paper.Controllers.LatexPaper', [
     'MessagesService',
     'SyncTexParserService',
     '$document',
+    '$window',
     'WindowActiveService',
     'LatexService',
     'MobWriteService',
@@ -59,6 +60,7 @@ angular.module('bluelatex.Paper.Controllers.LatexPaper', [
               MessagesService,
               SyncTexParserService,
               $document,
+              $window,
               WindowActiveService,
               LatexService,
               MobWriteService,
@@ -127,6 +129,9 @@ angular.module('bluelatex.Paper.Controllers.LatexPaper', [
       /* Exit Paper */
       /**************/
       var exitPaper = function () {
+        if($scope.isPDFPopupOpen) {
+          pdfPopup.close();
+        }
         pageActive = false;
         WindowActiveService.removeObserverCallback(windowStatusCallback);
         AceMobWriteClient.message({ type: 'leave', 'user': $rootScope.loggedUser.name });
@@ -134,12 +139,12 @@ angular.module('bluelatex.Paper.Controllers.LatexPaper', [
         PaperService.leavePaper($scope.paperId, peerId);
       };
       
-      window.onbeforeunload = function () {
+      $window.onbeforeunload = function () {
         AceMobWriteClient.message({ type: 'leave', 'user': $rootScope.loggedUser.name });
         return localize.getLocalizedString('_Exit_paper_confirm_');
       };
 
-      window.onunload = function () {
+      $window.onunload = function () {
         exitPaper();
       };
 
@@ -183,6 +188,10 @@ angular.module('bluelatex.Paper.Controllers.LatexPaper', [
         PaperService.getSynctex($scope.paperId).then(function (data) {
           $scope.synctex = SyncTexParserService.parse(data);
           $rootScope.$$phase || $rootScope.$apply();
+
+          if($scope.isPDFPopupOpen) {
+            pdfPopup.synctex = $scope.synctex;
+          }
         });
       };
 
@@ -624,7 +633,11 @@ angular.module('bluelatex.Paper.Controllers.LatexPaper', [
           getLog();
           if(data.response == true) {
             $scope.revision++;
-            parsePDF();
+            if($scope.isPDFPopupOpen) {
+              pdfPopup.updatePDF();
+            } else {
+              parsePDF();  
+            }
             getSyncTex();
             getPages();
           }
@@ -841,6 +854,9 @@ angular.module('bluelatex.Paper.Controllers.LatexPaper', [
         }
       });
 
+      /********************/
+      /* MobWrite Message */ 
+      /********************/
       $scope.connectedUsers = {};
       var userStyle = document.createElement('style');
       userStyle.type = 'text/css';
@@ -928,5 +944,30 @@ angular.module('bluelatex.Paper.Controllers.LatexPaper', [
       $scope.range = function(n) {
         return new Array(parseInt(n));
       };
+
+      /*************/
+      /* PDF Popup */ 
+      /*************/
+      var pdfPopup;
+      $scope.isPDFPopupOpen = false;
+      $scope.openPDFPopup = function() {
+        if($scope.isPDFPopupOpen) {
+          return;
+        }
+        pdfPopup = $window.open('/pdfPopup.html','PDF','menubar=no,toolbar=no,width=' + Math.round($window.outerWidth/2) + ',height=' +  Math.round($window.outerHeight) + ',left=' + Math.round($window.outerWidth/2) + ',top=0,resizable=yes,scrollbars=yes');
+        pdfPopup.pdfURL = $scope.pdfURL;
+        
+        pdfPopup.onunload = function () {
+          if(!$scope.isPDFPopupOpen) {
+            return;
+          }
+          $scope.isPDFPopupOpen = false;
+          $scope.$apply();
+        };
+
+        pdfPopup.onload = function () {
+          $scope.isPDFPopupOpen = true;
+        };
+      }
     }
   ]);

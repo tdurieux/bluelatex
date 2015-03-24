@@ -1,0 +1,183 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="shortcut icon" type="image/png" href="favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>PDF viewer</title>
+    <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" href="css/css.css">
+    <style type="text/css">
+    #paper .options {
+        top: 0;
+    }
+    #preview {
+        padding-top: 42px;
+        border: 0;
+    }
+    </style>
+
+    <script src="lib/pdfjs/src/shared/util.js"></script>
+    <script src="lib/pdfjs/src/shared/colorspace.js"></script>
+    <script src="lib/pdfjs/src/shared/function.js"></script>
+    <script src="lib/pdfjs/src/shared/annotation.js"></script>
+
+    <script src="lib/pdfjs/src/display/api.js"></script>
+    <script src="lib/pdfjs/src/display/metadata.js"></script>
+    <script src="lib/pdfjs/src/display/canvas.js"></script>
+    <script src="lib/pdfjs/src/display/webgl.js"></script>
+    <script src="lib/pdfjs/src/display/pattern_helper.js"></script>
+    <script src="lib/pdfjs/src/display/font_loader.js"></script>
+    <script src="lib/pdfjs/web/ui_utils.js"></script>
+    <script src="lib/pdfjs/web/text_layer_builder.js"></script>
+    <script>
+        // Specify the main script used to create a new PDF.JS web worker.
+        // In production, leave this undefined or change it to point to the
+        // combined `pdf.worker.js` file.
+        PDFJS.workerSrc = 'lib/pdfjs/src/worker_loader.js';
+    </script>
+</head>
+<body id="paper">
+    <div class="top options">
+        <div class="right">
+            <div class="pdf_action" ng-if="!isPDFPopupOpen">
+              <div class="scale" i18n-Tooltip="_scale_tooltip_">
+                <select ng-model="scale">
+                  <option value="auto">Auto</option>
+                  <option value="0.5">50%</option>
+                  <option value="0.75">75%</option>
+                  <option value="1">100%</option>
+                  <option value="1.25">125%</option>
+                  <option value="1.50">150%</option>
+                  <option value="2">200%</option>
+                </select>
+              </div>
+              <div class="navigation">
+                <div class="prevPage icon-prev-page" ng-click="prevPage()">&nbsp;</div>
+                <input type="number" max="{{totalPage}}" ng-model="page" ng-change="changePage(page)">
+                <span>/</span>
+                <div class="totalPage">{{totalPage}}</div>
+                <div class="nextPage icon-next-page" ng-click="nextPage()">&nbsp;</div>
+              </div>
+              <div class="option">
+                <div class="label">
+                    <span ng-click="openPDFPopup()" data-i18n="_Open_PDF_popup_" i18n-Tooltip="_open_PDF_popup_tooltip_"></span>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+    <div id="preview">
+    </div>
+
+    <script>
+        if(window.pdfURL == null) {
+            window.close();
+        }
+        function updatePDF() {
+            PDFJS.getDocument(pdfURL).then(renderPDF);
+        }
+        updatePDF();
+
+        var ratio,
+            pdf;
+        var preview = document.getElementById('preview');
+        function renderPDF(p) {
+            pdf = p;
+            preview.innerHTML = '';
+            for (var i = 1; i < pdf.numPages + 1; i++) {
+                pdf.getPage(i).then(renderPage);
+            };
+        }
+
+        function renderPage(page) {
+            var preview_page_container = document.createElement('div');
+            preview_page_container.className = "preview_page_container";
+
+            var containerDiv = document.createElement('div');
+            containerDiv.className = "container";
+            preview_page_container.appendChild(containerDiv);
+
+            var textLayerDiv = document.createElement('div');
+            textLayerDiv.className = "textLayer";
+            containerDiv.appendChild(textLayerDiv);
+            var canvas = document.createElement('canvas');
+            canvas.height = 0;
+            containerDiv.appendChild(canvas);
+
+            preview.appendChild(preview_page_container);
+            
+
+            var ratio = preview_page_container.clientWidth/page.getViewport(1.0).width;
+
+            var viewport = page.getViewport(ratio);
+
+            var pdfDimension = {
+                scale: ratio,
+                height: viewport.height
+            };
+            //Set the canvas height and width to the height and width of the viewport
+            var context = canvas.getContext('2d');
+            var outputScale = getOutputScale(context);
+
+            containerDiv.style.height = viewport.height + 'px';
+            containerDiv.style.width = viewport.width + 'px';
+            canvas.width = (Math.floor(viewport.width) * outputScale.sx) | 0;
+            canvas.height = (Math.floor(viewport.height) * outputScale.sy) | 0;
+            textLayerDiv.style.width = canvas.width + 'px';
+            textLayerDiv.style.height = canvas.height + 'px';
+
+            textLayerDiv.innerHTML = '';
+
+            var cssScale = 'scale(' + (1 / outputScale.sx) + ', ' +
+              (1 / outputScale.sy) + ')';
+            CustomStyle.setProp('transform', canvas, cssScale);
+            CustomStyle.setProp('transformOrigin', canvas, '0% 0%');
+
+            if (textLayerDiv) {
+              CustomStyle.setProp('transform', textLayerDiv, cssScale);
+              CustomStyle.setProp('transformOrigin', textLayerDiv, '0% 0%');
+            }
+
+            context._scaleX = outputScale.sx;
+            context._scaleY = outputScale.sy;
+            if (outputScale.scaled) {
+              context.scale(outputScale.sx, outputScale.sy);
+            }
+            /*          
+            // render PDF and text layer
+            page.getTextContent().then(function (textContent) {
+            var textLayer = new TextLayerBuilder({
+              textLayerDiv: textLayerDiv,
+              viewport: viewport,
+              pageIndex: 0
+            });
+            textLayer.setTextContent(textContent);
+
+            var renderContext = {
+              canvasContext: context,
+              viewport: viewport
+            };
+
+            page.render(renderContext);
+            });*/
+            var renderContext = {
+                canvasContext: context,
+                viewport: viewport
+            };
+
+            page.render(renderContext);
+        }
+
+        window.onresize = function() {
+            if(pdf) {
+                renderPDF(pdf);
+            }
+        }
+    </script>
+</body>
+</html>
